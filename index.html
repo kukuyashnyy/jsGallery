@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>jsGallery</title>
+    <style>
+        .gallery {
+            border: solid black 1px;
+            width: 800px;
+            height: 800px;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+        }
+
+        #image {
+            height: 85%;
+            display: flex;
+            justify-content: center;
+            border: solid red 1px;
+
+        }
+
+        #dots {
+            height: 5%;
+            border: solid green 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #dots div {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: solid 2px black;
+            align-items: center;
+            text-align: center;
+            margin: 5px;
+        }
+        .selected {
+            background-color: gray;
+        }
+        .unactive {
+
+        }
+        .buttons {
+            height: 10%;
+            border: solid orange 1px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .buttons button {
+            font-size: 1.2em;
+            width: 100px;
+            height: 40px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="gallery">
+    <div id="image">
+        <img src="" alt="">
+    </div>
+    <div id="dots">
+    </div>
+    <div class="buttons">
+        <button>First</button>
+        <button>Previous</button>
+        <button>Play</button>
+        <button>Next</button>
+        <button>Last</button>
+    </div>
+</div>
+<script>
+
+
+    const $ = (query) => document.querySelector(query);
+
+    let images = [];
+    let picNumb = 0;
+    images[0] = "images/77-800x600.jpg";
+    images[1] = "images/140-800x600.jpg";
+    images[2] = "images/240-800x600.jpg";
+    images[3] = "images/416-800x600.jpg";
+    images[4] = "images/522-800x600.jpg";
+
+
+
+    for (let i = 1; i <= images.length; i++) {
+        const element = document.createElement("DIV");
+        // element.appendChild(document.createTextNode(i));
+        document.querySelector("#dots").appendChild(element);
+    }
+
+    //first load
+    document.querySelector("#image > img").src = images[picNumb];
+
+    document.body.addEventListener("mousedown", (e) => clickButton(e));
+    window.addEventListener("load", () => refreshDot(0));
+
+
+
+    const clickButton = function (e) {
+        switch (e.target.innerText) {
+            case "First":
+                picNumb = 0;
+                break;
+            case "Previous":
+                picNumb--;
+                if (picNumb < 0) picNumb = 0;
+                break;
+            case "Next":
+                picNumb++;
+                if (picNumb > images.length-1) picNumb = images.length-1;
+                break;
+            case "Last":
+                picNumb = images.length-1;
+                break;
+            case "Play":
+                let runSlide = setInterval(() => document.querySelector("#image > img").src = images[picNumb], 1000);
+                    break;
+        }
+        document.querySelector("#image > img").src = images[picNumb];
+        refreshDot(picNumb);
+    }
+
+    const slide = function() {
+        document.querySelector("#image > img").src = images[++picNumb];
+    }
+
+    const refreshDot = function (e) {
+        e++;
+        for (let i = 1; i <= images.length; i++) {
+            document.querySelector("#dots > div:nth-child(" + i + ")").className = document.querySelector("#dots > div:nth-child(" + i + ")").className.replace('selected', '');
+        }
+        document.querySelector("#dots > div:nth-child(" + e + ")").className = document.querySelector("#dots > div:nth-child(" + e + ")").className + 'selected';
+    }
+
+</script>
+</body>
+</html>
