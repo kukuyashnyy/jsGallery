@@ -27,23 +27,29 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            color: transparent;
         }
 
         #dots div {
-            width: 20px;
-            height: 20px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            border: solid 2px black;
+            border: solid 2px gray;
             align-items: center;
             text-align: center;
             margin: 5px;
         }
+
         .selected {
             background-color: gray;
         }
-        .unactive {
 
+        .unactive {
+            border: 1px solid #999999;
+            background-color: #cccccc;
+            color: #666666;
         }
+
         .buttons {
             height: 10%;
             border: solid orange 1px;
@@ -82,6 +88,9 @@
 
     let images = [];
     let picNumb = 0;
+    let prePicNumb = 0;
+    let runSlide;
+
     images[0] = "images/77-800x600.jpg";
     images[1] = "images/140-800x600.jpg";
     images[2] = "images/240-800x600.jpg";
@@ -89,10 +98,11 @@
     images[4] = "images/522-800x600.jpg";
 
 
-
     for (let i = 1; i <= images.length; i++) {
+        const att = document.createAttribute("data-number");
         const element = document.createElement("DIV");
-        // element.appendChild(document.createTextNode(i));
+        att.value = i;
+        element.setAttributeNode(att);
         document.querySelector("#dots").appendChild(element);
     }
 
@@ -100,12 +110,15 @@
     document.querySelector("#image > img").src = images[picNumb];
 
     document.body.addEventListener("mousedown", (e) => clickButton(e));
-    window.addEventListener("load", () => refreshDot(0));
-
+    window.addEventListener("load", () => reflashItems());
 
 
     const clickButton = function (e) {
-        switch (e.target.innerText) {
+        const target = e.target;
+        if (parseInt(target.getAttribute("data-number")) > 0) {
+            picNumb = parseInt(target.getAttribute("data-number")) - 1;
+        }
+        switch (target.innerText) {
             case "First":
                 picNumb = 0;
                 break;
@@ -115,30 +128,89 @@
                 break;
             case "Next":
                 picNumb++;
-                if (picNumb > images.length-1) picNumb = images.length-1;
+                if (picNumb > images.length - 1) picNumb = images.length - 1;
                 break;
             case "Last":
-                picNumb = images.length-1;
+                picNumb = images.length - 1;
                 break;
             case "Play":
-                let runSlide = setInterval(() => document.querySelector("#image > img").src = images[picNumb], 1000);
-                    break;
+                runSlide = setInterval(() => {
+                    if (picNumb < images.length - 1) {
+                        picNumb++;
+                    } else {
+                        document.querySelector("body > div > div.buttons > button:nth-child(3)").innerText = "Play";
+                        clearInterval(runSlide);
+                        picNumb = 0;
+                    }
+                    reflashItems();
+                }, 1000);
+                target.innerText = "Stop";
+                break;
+            case "Stop":
+                clearInterval(runSlide);
+                target.innerText = "Play";
+                break;
         }
-        document.querySelector("#image > img").src = images[picNumb];
-        refreshDot(picNumb);
+        reflashItems();
     }
 
-    const slide = function() {
-        document.querySelector("#image > img").src = images[++picNumb];
+    const reflashItems = function () {
+        setPic(picNumb);
+        setDot(picNumb);
+        setButtons(picNumb);
     }
 
-    const refreshDot = function (e) {
+    const setPic = function (numb) {
+        let visPic = 1.0;
+        let hide = false;
+        if (!(numb === prePicNumb)) {
+            let hiding = setInterval(() => {
+                if (!hide) {
+                    visPic = visPic - 0.05;
+                    document.querySelector("#image > img").style.opacity = visPic;
+                    if (visPic <= 0.3) {
+                        hide = true;
+                        document.querySelector("#image > img").src = images[numb];
+                    }
+                } else {
+                    visPic = visPic + 0.05;
+                    document.querySelector("#image > img").style.opacity = visPic;
+                    if (visPic >= 1.0) {
+                        clearInterval(hiding);
+                    }
+                }
+            }, 20);
+        }
+        prePicNumb = numb;
+    }
+
+    const setDot = function (e) {
         e++;
         for (let i = 1; i <= images.length; i++) {
             document.querySelector("#dots > div:nth-child(" + i + ")").className = document.querySelector("#dots > div:nth-child(" + i + ")").className.replace('selected', '');
         }
         document.querySelector("#dots > div:nth-child(" + e + ")").className = document.querySelector("#dots > div:nth-child(" + e + ")").className + 'selected';
     }
+
+    const setButtons = function (e) {
+        if (e === 0) {
+            document.querySelector("body > div > div.buttons > button:nth-child(1)").className = 'unactive';
+            document.querySelector("body > div > div.buttons > button:nth-child(2)").className = 'unactive';
+        }
+        if (e > 0) {
+            document.querySelector("body > div > div.buttons > button:nth-child(1)").className = document.querySelector("body > div > div.buttons > button:nth-child(1)").className.replace('unactive', '');
+            document.querySelector("body > div > div.buttons > button:nth-child(2)").className = document.querySelector("body > div > div.buttons > button:nth-child(2)").className.replace('unactive', '');
+        }
+        if (e === images.length - 1) {
+            document.querySelector("body > div > div.buttons > button:nth-child(4)").className = 'unactive';
+            document.querySelector("body > div > div.buttons > button:nth-child(5)").className = 'unactive';
+        }
+        if (e < images.length - 1) {
+            document.querySelector("body > div > div.buttons > button:nth-child(4)").className = document.querySelector("body > div > div.buttons > button:nth-child(4)").className.replace('unactive', '');
+            document.querySelector("body > div > div.buttons > button:nth-child(5)").className = document.querySelector("body > div > div.buttons > button:nth-child(5)").className.replace('unactive', '');
+        }
+    }
+
 
 </script>
 </body>
